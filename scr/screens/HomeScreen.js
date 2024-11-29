@@ -4,28 +4,17 @@ import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
 const HomeScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
-      <Text style={styles.welcomeText}>WELCOME TO SENCARE</Text>
+      <Text style={styles.welcomeText}>WELCOME TO SENCARE APP</Text>
       <Image
         source={require("../../assets/images/image.png")}
         style={styles.image}
+        testID="home-screen-image"
       />
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate("AddPatientScreen")}
-      >
-        <Text style={styles.buttonText}>Go to Add Patient</Text>
-      </TouchableOpacity>
       <TouchableOpacity
         style={styles.button}
         onPress={() => navigation.navigate("ListPatientScreen")}
       >
         <Text style={styles.buttonText}>Go to Patient's List</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate("WellnessCenter")}
-      >
-        <Text style={styles.buttonText}>Go to Wellness Center</Text>
       </TouchableOpacity>
     </View>
   );
