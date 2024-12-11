@@ -11,23 +11,19 @@ app.use(bodyParser.json());
 app.use(cors());
 
 // MongoDB Connection URI
-const mongoURI = "mongodb://192.168.2.130:27017/clinicalrecords";
-
+const mongoURI = "mongodb://172.20.10.6:27017/clinicalrecords";
 // MongoDB Connection Function
 const connectToDatabase = async () => {
   let retries = 0;
   const maxRetries = 5;
   while (retries < maxRetries) {
     try {
-      await mongoose.connect(mongoURI, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      });
+      await mongoose.connect(mongoURI); // Simplified connection
       console.log("Connected to MongoDB");
       break;
     } catch (error) {
       retries++;
-      console.error(`MongoDB connection error (Attempt ${retries}):`, error.message);
+      console.error(`MongoDB connection error (Attempt ${retries}): ${error.message}`);
       if (retries < maxRetries) await new Promise((resolve) => setTimeout(resolve, 5000));
       else process.exit(1);
     }
@@ -41,13 +37,16 @@ connectToDatabase();
 const patientSchema = new mongoose.Schema({
   name: { type: String, required: true },
   age: { type: Number, required: true },
-  phone: { type: Number, required: true },
+  phone: { type: String, required: true },
   critical: { type: Boolean, required: true },
   diagnosis: { type: String, required: true },
-  details: { type: String, required: true },
   gender: { type: String, required: true },
   address: { type: String, required: true },
   medicalHistory: { type: String, required: true },
+  heart_rate: { type: Number, required: true },
+  blood_pressure: { type: String, required: true },
+  respiratory_rate: { type: Number, required: true },
+  temperature: { type: Number, required: true },
 });
 
 // Define the Patient Model
@@ -123,4 +122,4 @@ app.delete("/patients/:id", async (req, res) => {
 
 // Start the Server
 const PORT = 5000;
-app.listen(PORT, () => console.log(`Server running on http://192.168.2.130:${PORT}`));
+app.listen(PORT, () => console.log(`Server running on http://172.20.10.6:${PORT}`));

@@ -19,7 +19,7 @@ const ViewPatientRecordScreen = () => {
   const [editedPatient, setEditedPatient] = useState(patient);
 
   const clinicOptions = ["Clinic A", "Clinic B", "Clinic C"];
-  const testTypes = ["Blood Test", "X-Ray", "MRI", "CT Scan", "ECG"];
+  const testTypes = ["Blood Pressure", "Heart Rate", "Respiratory Rate", "Temperature"];
 
   useEffect(() => {
     if (!patient) {
@@ -28,7 +28,7 @@ const ViewPatientRecordScreen = () => {
     }
   }, [patient]);
 
-  const handleDelete = () => {
+   const handleDelete = () => {
     Alert.alert("Delete Record", "Are you sure you want to delete this record?", [
       { text: "Cancel", style: "cancel" },
       {
@@ -36,7 +36,7 @@ const ViewPatientRecordScreen = () => {
         style: "destructive",
         onPress: () => {
           axios
-            .delete(`http://192.168.2.130:5000/patients/${patient._id}`)
+            .delete(`http://172.20.10.6:5000/patients/${patient._id}`)
             .then(() => {
               Alert.alert("Success", "Patient record deleted successfully");
               navigation.navigate("ListPatientScreen");
@@ -64,7 +64,7 @@ const ViewPatientRecordScreen = () => {
 
   const handleSavePatient = () => {
     axios
-      .put(`http://192.168.2.130:5000/patients/${patient._id}`, editedPatient)
+      .put(`http://172.20.10.6:5000/patients/${patient._id}`, editedPatient)
       .then(() => {
         Alert.alert("Success", "Patient record updated successfully");
         setIsEditing(false);
@@ -92,14 +92,30 @@ const ViewPatientRecordScreen = () => {
       </View>
 
       <View style={styles.patientDetails}>
-        <PatientDetail label="Name" value={editedPatient?.name} isEditing={isEditing} onChange={(text) => setEditedPatient({ ...editedPatient, name: text })} />
-        <PatientDetail label="Age" value={editedPatient?.age} isEditing={isEditing} onChange={(text) => setEditedPatient({ ...editedPatient, age: text })} />
-        <PatientDetail label="Gender" value={editedPatient?.gender} isEditing={isEditing} onChange={(text) => setEditedPatient({ ...editedPatient, gender: text })} />
-        <PatientDetail label="Diagnosis" value={editedPatient?.diagnosis} isEditing={isEditing} onChange={(text) => setEditedPatient({ ...editedPatient, diagnosis: text })} />
-        <PatientDetail label="Phone" value={editedPatient?.phone} isEditing={isEditing} onChange={(text) => setEditedPatient({ ...editedPatient, phone: text })} />
-        <PatientDetail label="Address" value={editedPatient?.address} isEditing={isEditing} onChange={(text) => setEditedPatient({ ...editedPatient, address: text })} />
-        <PatientDetail label="Details" value={editedPatient?.details} isEditing={isEditing} onChange={(text) => setEditedPatient({ ...editedPatient, details: text })} />
-        <PatientDetail label="Critical Condition" value={editedPatient?.critical ? "Yes" : "No"} isEditing={isEditing} onChange={(text) => setEditedPatient({ ...editedPatient, critical: text === "Yes" })} />
+        {['Name', 'Age', 'Gender', 'Diagnosis', 'Phone', 'Address'].map((label, index) => (
+          <PatientDetail
+            key={index}
+            label={label}
+            value={editedPatient[label.toLowerCase()]}
+            isEditing={isEditing}
+            onChange={(text) => setEditedPatient({ ...editedPatient, [label.toLowerCase()]: text })}
+          />
+        ))}
+        <PatientDetail
+          label="Critical Condition"
+          value={editedPatient?.critical ? "Yes" : "No"}
+          isEditing={isEditing}
+          onChange={(text) => setEditedPatient({ ...editedPatient, critical: text === "Yes" })}
+        />
+        {['Heart Rate', 'Blood Pressure', 'Respiratory Rate', 'Temperature'].map((label, index) => (
+          <PatientDetail
+            key={index}
+            label={label}
+            value={editedPatient[label.toLowerCase().replace(' ', '_')]}
+            isEditing={isEditing}
+            onChange={(text) => setEditedPatient({ ...editedPatient, [label.toLowerCase().replace(' ', '_')]: text })}
+          />
+        ))}
       </View>
 
       {isEditing && (
@@ -184,7 +200,7 @@ const PatientDetail = ({ label, value, isEditing, onChange }) => (
     <Text style={styles.detailLabel}>{label}:</Text>
     {isEditing ? (
       <TextInput
-        style={styles.textInput}
+        style={styles.detailInput}
         value={value}
         onChangeText={onChange}
       />
@@ -194,36 +210,33 @@ const PatientDetail = ({ label, value, isEditing, onChange }) => (
   </View>
 );
 
-const pickerSelectStyles = StyleSheet.create({
+const pickerSelectStyles = {
   inputIOS: {
-    fontSize: 18,
-    paddingVertical: 12,
-    paddingHorizontal: 10,
+    padding: 10,
     borderWidth: 1,
-    borderColor: "#e0e0e0",
+    borderColor: '#ccc',
     borderRadius: 4,
-    color: "black",
+    marginBottom: 10,
   },
   inputAndroid: {
-    fontSize: 18,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
+    padding: 10,
     borderWidth: 1,
-    borderColor: "#e0e0e0",
+    borderColor: '#ccc',
     borderRadius: 4,
-    color: "black",
+    marginBottom: 10,
   },
-});
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    padding: 20,
+    backgroundColor: "#f5f5f5",
   },
   headerContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    marginBottom: 10,
   },
   header: {
     fontSize: 24,
@@ -233,114 +246,119 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   deleteIcon: {
-    marginLeft: 16,
+    marginLeft: 15,
   },
   patientDetails: {
-    marginTop: 16,
+    marginBottom: 20,
   },
   detailRow: {
     flexDirection: "row",
-    marginBottom: 12,
+    marginBottom: 10,
   },
   detailLabel: {
-    fontSize: 16,
-    fontWeight: "600",
     flex: 1,
+    fontWeight: "bold",
+  },
+  detailInput: {
+    flex: 2,
+    borderBottomWidth: 1,
+    borderColor: "#ccc",
+    padding: 5,
   },
   detailValue: {
-    fontSize: 16,
-    flex: 2,
-  },
-  textInput: {
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 4,
-    padding: 8,
     flex: 2,
   },
   saveButton: {
     backgroundColor: "#28a745",
-    padding: 12,
-    borderRadius: 8,
+    padding: 10,
+    borderRadius: 5,
     alignItems: "center",
-    marginTop: 16,
+    marginBottom: 20,
   },
   saveButtonText: {
     color: "#fff",
-    fontSize: 18,
+    fontWeight: "bold",
   },
   testSection: {
-    marginTop: 32,
+    marginBottom: 20,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   testHeader: {
     fontSize: 20,
     fontWeight: "bold",
   },
   addTestButton: {
-    marginTop: 10,
     flexDirection: "row",
-    justifyContent: "flex-end",
+    alignItems: "center",
   },
   testForm: {
-    marginTop: 20,
+    padding: 10,
+    backgroundColor: "#fff",
+    borderRadius: 5,
+    marginBottom: 20,
   },
   label: {
-    fontSize: 16,
-    marginBottom: 8,
+    marginBottom: 5,
+    fontWeight: "bold",
   },
   dateButton: {
-    fontSize: 18,
-    color: "blue",
-    marginBottom: 12,
+    padding: 10,
+    backgroundColor: "#f0f0f0",
+    borderRadius: 5,
+    textAlign: "center",
+    marginBottom: 10,
   },
   locationOption: {
     padding: 10,
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: "#ccc",
+    borderRadius: 5,
     marginBottom: 5,
-    borderRadius: 4,
   },
   selectedLocation: {
-    backgroundColor: "#cce7ff",
+    backgroundColor: "#d3f9d8",
   },
   submitButton: {
     backgroundColor: "#007bff",
     padding: 10,
-    borderRadius: 8,
+    borderRadius: 5,
     alignItems: "center",
-    marginTop: 16,
+    marginTop: 10,
   },
   submitButtonText: {
     color: "#fff",
-    fontSize: 16,
+    fontWeight: "bold",
   },
   table: {
     marginTop: 20,
-  },
-  tableHeaderRow: {
-    backgroundColor: "#f2f2f2",
+    backgroundColor: "#fff",
+    borderRadius: 5,
+    padding: 10,
   },
   tableHeader: {
     fontSize: 18,
     fontWeight: "bold",
-    padding: 10,
-    borderBottomWidth: 1,
-    borderColor: "#ddd",
+    marginBottom: 10,
   },
   tableRow: {
     flexDirection: "row",
+    paddingVertical: 5,
     borderBottomWidth: 1,
-    borderColor: "#ddd",
+    borderBottomColor: "#ddd",
+  },
+  tableHeaderRow: {
+    borderBottomWidth: 2,
   },
   tableCellHeader: {
     flex: 1,
-    fontWeight: "600",
-    padding: 10,
+    fontWeight: "bold",
+    textAlign: "center",
   },
   tableCell: {
     flex: 1,
-    padding: 10,
+    textAlign: "center",
   },
 });
 

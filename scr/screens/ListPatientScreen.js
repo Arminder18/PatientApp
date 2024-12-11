@@ -23,7 +23,7 @@ const ListPatientScreen = () => {
 
   useEffect(() => {
     axios
-      .get("http://192.168.2.130:5000/patients")
+      .get("http://172.20.10.6:5000/patients")
       .then((response) => {
         setPatients(response.data);
         setFilteredPatients(response.data);
